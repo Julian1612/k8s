@@ -1,0 +1,41 @@
+---
+# 1. Frontend Service (Externer Zugriff über NodePort)
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+# 2. Backend Service (Interner Zugriff über ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP # Nur innerhalb des Clusters erreichbar
+  selector:
+    app: backend
+  ports:
+    - port: 8080 # Interner Service Port
+      targetPort: 8080 # Port des Backend-Containers
+
+---
+# 3. Database Service (Interner Zugriff über ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+spec:
+  type: ClusterIP # Nur innerhalb des Clusters erreichbar
+  selector:
+    app: database
+  ports:
+    - port: 5432
+      targetPort: 5432 # Port des DB-Containers

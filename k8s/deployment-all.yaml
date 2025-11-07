@@ -1,0 +1,75 @@
+---
+# 1. Frontend Deployment (Dein Nginx-Webseite)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend-container
+        image: meine-webseite:v1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80 # Nginx Port
+
+---
+# 2. Backend Deployment (Deine Node.js API)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend-container
+        image: my-api:v1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080 # Node.js Port
+
+---
+# 3. Database Deployment (PostgreSQL)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: db-container
+        image: postgres:16 # Standard Docker Hub Image
+        # HIER WICHTIGE ZUGANGSDATEN FÜR POSTGRES HINTERLEGEN!
+        env:
+        - name: POSTGRES_USER
+          value: user
+        - name: POSTGRES_PASSWORD
+          value: mysecretpassword
+        - name: POSTGRES_DB
+          value: appdb
+        ports:
+        - containerPort: 5432 # PostgreSQL Port
