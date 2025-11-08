@@ -1,0 +1,90 @@
+Um das Cluster manuell in den funktionsfähigen Zustand zu versetzen, nachdem der Fehler behoben wurde, musst du die Schritte des Bash-Skripts einzeln ausführen.
+
+Hier sind alle Befehle in der korrekten Reihenfolge, wobei die Wartezeiten berücksichtigt werden, um die Webhook-Fehler zu vermeiden:
+
+## 📜 Manuelle Start-Befehle (Schritt-für-Schritt)
+
+### 1\. Cluster-Initialisierung (Terminal 1)
+
+1.  **Minikube starten:**
+    ```bash
+    minikube start
+    ```
+2.  **Ingress aktivieren:**
+    ```bash
+    minikube addons enable ingress
+    ```
+3.  **Auf Ingress Deployment warten:**
+    *(Dies ist der entscheidende Schritt, um den späteren Webhook-Fehler zu vermeiden)*
+    ```bash
+    kubectl rollout status deployment ingress-nginx-controller --namespace ingress-nginx --timeout=120s
+    ```
+4.  **Zusätzliche Wartezeit für Netzwerkstabilität:**
+    ```bash
+    sleep 20
+    ```
+5.  **Docker-Umgebung umstellen:**
+    ```bash
+    eval $(minikube docker-env)
+    ```
+
+### 2\. Images bauen
+
+6.  **Frontend Image bauen:**
+    *(Gehe sicher, dass du dich im Projekt-Root-Verzeichnis befindest)*
+    ```bash
+    docker build --no-cache -t meine-webseite:v1 ./fullstack/frontend
+    ```
+7.  **Backend Image bauen:**
+    ```bash
+    docker build -t my-api:v1 ./fullstack/backend
+    ```
+
+### 3\. Ressourcen bereinigen & anwenden
+
+8.  **Vorhandene Ressourcen löschen** (behebt Konflikte):
+
+    ```bash
+    kubectl delete -f k8s/ --ignore-not-found=true
+    ```
+
+9.  **Ressourcen anwenden** (Deployments, Services, Ingress):
+
+    ```bash
+    kubectl apply -f k8s/
+    ```
+
+10. **Auf Anwendungs-Pods warten:**
+
+    ```bash
+    kubectl wait --for=condition=ready pod -l app=frontend --timeout=120s
+    kubectl wait --for=condition=ready pod -l app=backend --timeout=120s
+    kubectl wait --for=condition=ready pod -l app=database --timeout=120s
+    ```
+
+-----
+
+### 4\. Anwendung zugänglich machen (Terminal 2)
+
+Öffne ein **neues Terminalfenster** und führe diesen Befehl aus:
+
+11. **Port-Forwarding starten:**
+    *(Muss im Vordergrund laufen gelassen werden)*
+    ```bash
+    kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx
+    ```
+
+### 5\. Logs verfolgen (Terminal 3)
+
+Öffne ein **zweites neues Terminalfenster** und führe diesen Befehl aus:
+
+12. **Backend Logs streamen:**
+    ```bash
+    kubectl logs -f -l app=backend
+    ```
+
+Nach dem Start ist die Webseite über **`http://localhost:8080/`** erreichbar.
+
+-----
+
+Möchtest du nun mit der **CKAD-Aufgabe 1.1 ConfigMaps** fortfahren?

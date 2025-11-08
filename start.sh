@@ -35,6 +35,15 @@ check_status "Minikube Start"
 minikube addons enable ingress
 check_status "Minikube Ingress Addon"
 
+# 2.5 Warten auf Ingress Controller Deployment
+echo "   -> Warte auf Ingress Controller Deployment Rollout..."
+kubectl rollout status deployment ingress-nginx-controller --namespace ${INGRESS_NAMESPACE} --timeout=120s
+check_status "Warten auf Ingress Controller Deployment"
+
+# NEU: Zusätzliche Wartezeit für Netzwerkstabilität des Admission Webhook
+echo "   -> Warte 10 Sekunden auf Webhook Netzwerk-Stabilität..."
+sleep 10
+
 # 3. Docker-Umgebung auf Minikube umstellen
 eval $(minikube docker-env)
 check_status "Minikube Docker-Umgebung setzen"
