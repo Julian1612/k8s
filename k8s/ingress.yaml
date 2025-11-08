@@ -1,29 +1,31 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  creationTimestamp: "2025-11-07T18:16:09Z"
+  generation: 1
   name: fullstack-ingress
   namespace: default
-  annotations:
-    # Setzt den Root-Pfad des Ingress als Ziel
-    nginx.ingress.kubernetes.io/rewrite-target: /
+  resourceVersion: "5328"
+  uid: 5899b3d1-be30-4d50-b161-257a532e1e25
 spec:
   rules:
   - http:
       paths:
-      # 1. Frontend-Regel: Leitet den Root-Pfad ('/') an das Frontend weiter
-      - path: /
-        pathType: Prefix
-        backend:
+      - backend:
           service:
             name: frontend-service
             port:
               number: 80
-
-      # 2. Backend-Regel: Leitet alle Pfade, die mit /api beginnen, an das Backend weiter
-      - path: /api
+        path: /
         pathType: Prefix
-        backend:
+      - backend:
           service:
             name: backend-service
             port:
               number: 8080
+        path: /api
+        pathType: Prefix
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.49.2
