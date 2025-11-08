@@ -1,4 +1,4 @@
-cument.addEventListener('DOMContentLoaded', () => {
+ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('challengeForm');
     const submitButton = document.getElementById('submitButton');
     const responseMessageDiv = document.getElementById('responseMessage');
